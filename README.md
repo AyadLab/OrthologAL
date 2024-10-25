@@ -1,4 +1,4 @@
-# OrthogonAL Package
+# OrthologAL Package
 
 A package is needed for converting genes from different species to human to allow direct comparison using pharmacogenomic databases.
 
@@ -8,7 +8,7 @@ A package is needed for converting genes from different species to human to allo
 2. [Features](#features)
 3. [prerequisites](#prerequisites)
 4. [Installation](#installation)
-5. [Orthogonal App](#Orthogonal_App)
+5. [OrthologAL App](#Orthogonal_App)
 6. [Contributing](#contributing)
 7. [Contact](#contact)
 8. [License](#license)
@@ -71,7 +71,7 @@ library(OrthogonAL)
 OrthogonAL::OrthoConvo()
 ```
 
-### 5.Orthogonal App
+### 5.OrthologAL App
 <img width="521" alt="Screenshot 2024-05-14 at 2 00 23 PM" src="https://github.com/AyadLab/OrthogonAL/assets/43522813/6ba1f970-7652-48af-9601-a94a469ea133">
   
 ### Step 1: Upload the standard datatype format Seurat in the shiny app
