@@ -1,18 +1,22 @@
+# License agreement
+#
+# 1. The Board of Trustees of the Georgetown University provides OrthologAL software and code (“Service”) free of charge for non-commercial use only.
+# Use of the Service by any commercial entity for any purpose, including research, is prohibited.
+# 2. By using the Service, you agree to be bound by the terms of this Agreement. Please read it carefully.
+# 3. You agree not to use the Service for commercial advantage, or in the course of for-profit activities.
+# You agree not to use the Service on behalf of any organization that is not a non-profit organization. Commercial entities wishing to use this Service should
+# contact Georgetown University Office of Technology Commercialization.
+# 4. THE SERVICE IS OFFERED “AS IS”, AND, TO THE EXTENT PERMITTED BY LAW, Georgetown MAKES NO REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED. GEORGETOWN SHALL NOT BE LIABLE FOR ANY CLAIMS OR DAMAGES WITH RESPECT TO ANY LOSS OR OTHER CLAIM BY YOU OR ANY THIRD PARTY ON ACCOUNT OF, OR ARISING FROM THE USE OF THE SERVICE.
+# YOU HEREBY AGREE TO DEFEND AND INDEMNIFY GEORGETOWN, ITS TRUSTEES, EMPLOYEES, OFFICERS, STUDENTS, AGENTS, FACULTY, REPRESENTATIVES, AND VOLUNTEERS (“GEORGETOWN INDEMNITEES”) FROM ANY LOSS OR CLAIM ASSERTED AGAINST GEORGETOWN INDEMNITEES ARISING FROM YOUR USE OF THE SERVICE.
+# 5. All rights not expressly granted to you in this Agreement are reserved and retained by Georgetown or its licensors or content providers. This Agreement provides no license under any patent.
+# 6. You agree that this Agreement and any dispute arising under it is governed by the laws of the State of Washington DC, United States of America, applicable to agreements negotiated, executed, and performed within DC.
+# 7. Subject to your compliance with the terms and conditions set forth in this Agreement, Georgetown grants you a revocable, non-exclusive, non-transferable right to access and make use of the Service.
+#
 # A shiny Application to facilate the species conversion using standard datatype format Seurat object
-##################### ******************** OrthogonAL package ********************########################################################
-
+##################### ******************** OrthologAL package ********************########################################################
 #Packages required to load
 #Seurat V5 version used and this app supports v3/v4 versions too
-# library(shiny)
-# library(Seurat)
-# library(biomaRt)
-# library(data.table)
-# library(dplyr)
-# library(bslib)
-# library(DT)
-# library(ggplot2)
-# library(viridis)
-
 #Call OrthoConvo function to convert the seurat object of any species to human
 RunOrthologAL <- function() {
   library(shiny)
@@ -100,10 +104,6 @@ RunOrthologAL <- function() {
 
       counts_matrix <- get_counts_matrix(obj, assay)
       genes <- rownames(counts_matrix)
-      # Assuming `obj` and `assay` are defined
-      #counts_matrix <- get_counts_matrix(obj,assay)
-      #genes <- rownames(obj[[assay]]@counts)
-      #genes <- rownames(counts_matrix)
       gene_all <- sub("^hg38-|^mm10-", "", genes)
       if (input$species != "Custom") {
         # Use attributes and filters based on selected species
@@ -152,11 +152,10 @@ RunOrthologAL <- function() {
       }
       #species_sym gives us the gene symbol of species using the function species_symbol which is strip split function#####################################################################
       species_sym <- species_symbol(species_info[[2]])
-      #tmp.counts <- obj[[assay]]@counts
       #Selecting the PDOX model on the app which has two species information (human and mouse/rat/zebrafish) in the seurat object,but we just need to convert the species data into human##########
       if (input$Select_model == "patient derived xenograft or PDX") {
         print("PDOX model to convert species to human gene set successful......")
-        #Necessary to paste the gene symbols here as the current PDOX model objects have these symbols attached to them##################################################################
+        #Necessary to paste the gene symbols here, as the current PDOX model objects have these symbols attached to them to recognize the MM10/HG38 IDENTIFIER##################################################################
         converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
         converted$HGNC.symbol <- paste0("hg38-", converted$HGNC.symbol)
         hasspecies <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]]) %in% converted[[species_sym]])
@@ -175,15 +174,6 @@ RunOrthologAL <- function() {
         uniqueRows = TRUE,
         mart = mart.species
       )
-      # species_genes_list <- getLDS(
-      #   attributes = c(species_info[[2]],"ensembl_gene_id", "gene_biotype"),
-      #   filters = "ensembl_gene_id",
-      #   values = species_genes[[]],
-      #   mart = mart.species,
-      #   attributesL = c('hgnc_symbol'),
-      #   martL = mart.human,
-      #   uniqueRows = TRUE
-      # )
       symbol_id <- species_info[[2]]
       species_converted_hg <-  biomaRt::getLDS(
         attributes =  c(species_info[[2]],"gene_biotype","ensembl_gene_id"),
@@ -241,9 +231,6 @@ RunOrthologAL <- function() {
       type <- c(rep('matched', length(matched_genes)), rep('unmatched', length(unmatched_genes)))
       data_df <- data.frame(gene = all_genes, type = type)
       rv <- reactiveValues(data = data_df)
-      # umi_counts <- obj@assays[[assay]]$counts
-      # genes_matrix <- as.data.frame(Matrix::rowSums(umi_counts > 0))
-      # filtered_1 <- as.data.frame(genes_matrix[genes_matrix > 0,])
       output$pieChart <- renderPlot({
         ggplot(pie_data, aes(x = "", y = count, fill = category)) +
           geom_bar(stat = "identity", width = 0.9) +
@@ -297,9 +284,6 @@ RunOrthologAL <- function() {
       tmp@meta.data <- obj@meta.data
       tmp@reductions <- obj@reductions
       tmp@assays[[assay]] <- obj@assays[[assay]]
-      # ortho_umi_counts <- tmp@assays[[updated_assay_name]]$counts
-      # ortho_genes_matrix <- as.data.frame(Matrix::rowSums(ortho_umi_counts > 0))
-      # filtered_2 <- as.data.frame(ortho_genes_matrix[ortho_genes_matrix > 0,])
       # Add images if assay is "Spatial"
       if (assay == "Spatial") {
         tmp@images <- obj@images
@@ -308,28 +292,6 @@ RunOrthologAL <- function() {
       tmp <- ScaleData(tmp)
       convertedData(tmp)
     })
-    # filtered_2 <- as.data.frame(ortho_genes_matrix[ortho_genes_matrix > 0,])
-    # human_detected <- nrow(filtered_2) / nrow(filtered_1) * 100
-    # not_detected <- 100 - human_detected
-    # data_detected <- data.frame(
-    #   category = c("Human Detected", "Not Detected"),
-    #   percentage = c(human_detected, not_detected)
-    # )
-    # output$genesdetected <- renderPlot({
-    #   if (input$Select_model!= "patient derived xenograft or PDX") {  # Replace 'assay' with the correct input ID for your assay selection
-    #     ggplot(data_detected, aes(x = "", y = count, fill = category)) +
-    #       geom_bar(stat = "identity", width = 0.9) +
-    #       coord_polar(theta = "y") +
-    #       theme_void() +
-    #       geom_text(aes(label = paste0(round(percentage, 1), "%")),
-    #                 position = position_stack(vjust = 0.5),
-    #                 color = "white", size = 5, fontface = "bold") +
-    #       labs(title = "Human genes detected after conversion",
-    #            fill = "Category") +
-    #       theme(legend.title = element_blank())
-    #   }
-    # })
-
     output$status <- renderUI({
       if (!is.null(convertedData())) {
         tags$span("Conversion completed. You can now download the Orthogonal RDS file.", style = "color: green;")
