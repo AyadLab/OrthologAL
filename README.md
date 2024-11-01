@@ -72,7 +72,7 @@ devtools::install()
 library(shiny)
 library(OrthologAL)
 #Run the app
-OrthogonAL::RunOrthologAL()
+OrthologAL::RunOrthologAL()
 ```
 
 ### 5. OrthologAl App 
