@@ -86,15 +86,14 @@ OrthologAL::RunOrthologAL()
 - There is a custom option to access other species through these identifiers Ensembl ID ( which extracts the information of genes based on the species code),
   attribute(gene symbol) acts a query  to look through the Ensembl data,to get all the genes associated with the species and filter is optional.
 
-![Screenshot 2024-10-25 at 2 59 19 PM](https://github.com/user-attachments/assets/759d1b7f-436a-403c-b631-c105a4490a28)
-
-<img width="474" alt="Screenshot 2024-05-14 at 2 01 43 PM" src="https://github.com/AyadLab/OrthogonAL/assets/43522813/47dc3ad1-8afc-4378-b1de-b6bfb3cc8970">
+![Screenshot 2024-10-25 at 2 59 19 PM](https://github.com/user-attachments/assets/3a7b4f87-6a2c-47d7-8b42-ee566b65f380)
 
 
 ### Step 3: Select the assay supported by the seurat object uploaded in step 1
 
 - Spatial,RNA,SCT and integrated assays are available here.
-<img width="474" alt="Screenshot 2024-05-14 at 2 02 04 PM" src="https://github.com/AyadLab/OrthogonAL/assets/43522813/ca12e73c-42bf-4723-b218-0a018b56f633">
+
+<img width="249" alt="Screenshot 2024-11-01 at 9 29 11 AM" src="https://github.com/user-attachments/assets/441d1914-f520-40a3-b2f2-4b51958086b2">
 
 ### Step 4: Select the ANimal model
 
@@ -103,7 +102,6 @@ OrthologAL::RunOrthologAL()
 
 ### Step 5: Click on Convert
 - Status changes to green(conversion done)
-<img width="507" alt="Screenshot 2024-05-14 at 2 03 51 PM" src="https://github.com/AyadLab/OrthogonAL/assets/43522813/759cf4f8-eb33-4ff2-838d-593fd91f4802">
 
 ### Step 6 : Outputs
 - Example data (Assay : RNA and species : RAT )
