@@ -49,7 +49,7 @@ RunOrthologAL <- function() {
         div(class = "form-group",
             actionButton("convertButton", "Convert", class = "btn btn-primary btn-block")
         ),
-        downloadButton("downloadButton", "Download Converted Data", class = "btn btn-success btn-block mt-3")
+        uiOutput("download_visibile_in_main_page"),
       ),
       mainPanel(
         code("status"),
@@ -132,7 +132,7 @@ RunOrthologAL <- function() {
         )
       }
       #We get the species gene list from biomart server using useEnsembl function and converted variable helps us to create a dataframe of genes names equivalent of species used and human gene
-       ######## tested on different biomart servers ########
+      ######## tested on different biomart servers ########
       #mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
       # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
       mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast',host = "https://nov2020.archive.ensembl.org")
@@ -161,7 +161,7 @@ RunOrthologAL <- function() {
         #Necessary to paste the gene symbols here, as the current PDOX model objects have these symbols attached to them to recognize the MM10/HG38 IDENTIFIER##################################################################
         converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
         converted$HGNC.symbol <- paste0("hg38-", converted$HGNC.symbol)
-        hasspecies <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]]) %in% converted[[species_sym]])
+        hasspecies <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]])@counts %in% converted[[species_sym]])
         tmp.counts <- get_counts_matrix(obj,assay)[hasspecies,]
       }
       else {
@@ -283,6 +283,7 @@ RunOrthologAL <- function() {
         warn_missing = FALSE
       ))
       updated_assay_name <- paste0(assay, "_ortho")
+      tmp.counts <- as(tmp.counts, "dgCMatrix")
       tmp <- CreateSeuratObject(counts = tmp.counts,assay = updated_assay_name)
       tmp@meta.data <- obj@meta.data
       tmp@reductions <- obj@reductions
@@ -291,8 +292,8 @@ RunOrthologAL <- function() {
       if (assay == "Spatial") {
         tmp@images <- obj@images
       }
-      tmp <- NormalizeData(tmp)
-      tmp <- ScaleData(tmp)
+      #tmp <- NormalizeData(tmp)
+      #tmp <- ScaleData(tmp)
       convertedData(tmp)
     })
     output$status <- renderUI({
@@ -302,10 +303,15 @@ RunOrthologAL <- function() {
         tags$span("Upload an RDS file and click 'Convert' to start the conversion.", style = "color: blue;")
       }
     })
+    output$download_visibile_in_main_page <- renderUI({
+      if (!is.null(convertedData())) {
+        downloadButton("downloadButton", "Download Converted Data", class = "btn btn-success btn-block mt-3")
+      }
+    })
     output$downloadButton <- downloadHandler(
       filename = function() {
         if (!is.null(convertedData()))
-          paste("Orthogonal_", input$file$name)
+          paste("OrthologAL_", input$file$name)
       },
       content = function(file) {
         if (!is.null(convertedData()))
