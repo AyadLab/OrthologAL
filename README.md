@@ -98,11 +98,13 @@ OrthologAL::RunOrthologAL()
 
 <img width="249" alt="Screenshot 2024-11-01 at 9 29 11 AM" src="https://github.com/user-attachments/assets/441d1914-f520-40a3-b2f2-4b51958086b2">
 
-### (Optional) Step 4: Select the Animal model
+### (Optional) Step 4: PDX (Patient-Derived Xenogfraf) mode. 
 
 - If your input data contains both human and non-human cells/tissue, select 'PDX mode'. 
 - No selection required for single-species datasets.
+
 ![Screenshot 2024-10-25 at 3 01 28 PM](https://github.com/user-attachments/assets/8f48486f-000f-4c14-8a81-2a27e1e39675)
+
 
 ### Step 5: Click on Convert
 - The conversion is complete when the status symbol is green. 
