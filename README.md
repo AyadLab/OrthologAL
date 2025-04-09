@@ -15,7 +15,7 @@ YOU HEREBY AGREE TO DEFEND AND INDEMNIFY GEORGETOWN UNIVERSITY, ITS TRUSTEES, EM
 
 1. [Introduction](#introduction)
 2. [Features](#features)
-3. [prerequisites](#prerequisites)
+3. [Prerequisites](#prerequisites)
 4. [Installation](#installation)
 5. [OrthologAL App](#OrthologAL_App)
 6. [Contributing](#contributing)
