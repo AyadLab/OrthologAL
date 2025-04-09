@@ -90,7 +90,7 @@ OrthologAL::RunOrthologAL()
 - For alternate species, a custom option is available to access additional species' annotations using the species code. A custom species search initiates a query based on EnsemblID to identify matching human orthologs.
 
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3](https://github.com/user-attachments/assets/3a7b4f87-6a2c-47d7-8b42-ee566b65f380">
+    <img src="https://github.com/user-attachments/assets/3a7b4f87-6a2c-47d7-8b42-ee566b65f380">
 </p>
 
 
