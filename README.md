@@ -41,8 +41,7 @@ OrthologAL will be broadly useful for integrating pre-clinical, high-dimensional
 - Quality control metrics
 
 ### 3. Prerequisites
-Dependencies required 
-
+You will need to install the following dependencies. 
 ```r
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
