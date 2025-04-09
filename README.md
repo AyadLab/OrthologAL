@@ -85,14 +85,14 @@ OrthologAL::RunOrthologAL()
     <img src="https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3">
 </p>
 
-![Screenshot 2024-10-25 at 2 56 30 PM](https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3)
-
-
 ### Step 2: Select the input data species.
 - Select the species, by default OrthologAL supports conversion from mouse, rat, and zebrafish expression data.
 - For alternate species, a custom option is available to access additional species' annotations using the species code. A custom species search initiates a query based on EnsemblID to identify matching human orthologs.
 
-![Screenshot 2024-10-25 at 2 59 19 PM](https://github.com/user-attachments/assets/3a7b4f87-6a2c-47d7-8b42-ee566b65f380)
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3](https://github.com/user-attachments/assets/3a7b4f87-6a2c-47d7-8b42-ee566b65f380">
+</p>
+
 
 
 ### Step 3: Select the assay supported by the seurat object uploaded in step 1
