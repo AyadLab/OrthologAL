@@ -25,11 +25,11 @@ YOU HEREBY AGREE TO DEFEND AND INDEMNIFY GEORGETOWN UNIVERSITY, ITS TRUSTEES, EM
 ## 1. Introduction
 Researchers can input their single-cell or other high-dimensional gene expression data (i.e. spatial transcriptomics) from any species, and OrthologAL will output a human ortholog-converted dataset for download and use.
 
-To demonstrate the utility of this application, we characterized orthologous conversion in single-cell, single-nuclei, and spatial transcriptomic data derived from common pre-clinical models, including genetically engineered mouse models of medulloblastoma, patient-derived orthotopic xenografts of medulloblastoma, and mouse and rat models of spinal cord injury.
+To demonstrate the utility of this application, in the OrthologAL manuscript we characterized orthologous conversion in single-cell, single-nuclei, and spatial transcriptomic data derived from common pre-clinical models, including genetically engineered mouse models of medulloblastoma, patient-derived orthotopic xenografts of medulloblastoma, and mouse and rat models of spinal cord injury.
 
 We show that OrthologAL can convert these data efficiently while preserving the dimensional architecture of the transcriptomic expression data. 
 
-OrthologAL will be broadly useful for integrating pre-clinical, high-dimensional transcriptomics data with existing human-annotated databases.
+OrthologAL will be broadly useful for integrating pre-clinical, high-dimensional transcriptomics data with existing human-derived datasets such as the BROAD DepMap or the NIH LINCS L1000.
 
 ## 2. Features
 
