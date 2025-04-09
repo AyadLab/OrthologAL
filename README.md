@@ -81,6 +81,10 @@ OrthologAL::RunOrthologAL()
 ### 5. The OrthologAl App 
   
 ### Step 1: Upload a Seurat object.
+<p align="center">
+    <img width="460" height="300" src="https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3">
+</p>
+
 ![Screenshot 2024-10-25 at 2 56 30 PM](https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3)
 
 
