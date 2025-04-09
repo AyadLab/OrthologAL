@@ -127,7 +127,9 @@ Rishika Chowdary, MS, Robert K. Suter, Ph.D., Matthew D’Antuono, BS, Cynthia G
 Ki-Bum Lee, Ph.D., Jae K Lee, Ph.D., Nagi G. Ayad, Ph.D.
 
 ### 7. Contact
+Robert K. Suter, PhD
 [rks82@georgetown.edu](mailto:rks82@georgetown.edu) 
+Nagi G. Ayad, PhD
 [na853@georgetown.edu](mailto:na853@georgetown.edu) 
 
 
