@@ -1,12 +1,12 @@
 Package: OrthologAL
 Type: Package
-Title: OrthogonAL: A shiny application to facilitate the conversion of non-human to human gene expression 
-Version: 1.0
-Author: Rishika Chowdary,Robert Suter,Nagi Ayad
-Maintainer: The package maintainer <vc514@georgetown.edu>
-Description: OrthologAL leverages the data mining tool biomaRt to access different gene sets from ENSEMBL, and  facilitates the interaction with these servers without the need for any scripting , 
-             Researchers can effortlessly input their Seurat object, a standard datatype format for single-cell RNA sequencing (scRNAseq), single-nuclei RNA sequencing, or spatial transcriptomics data of any species, 
-             and OrthologAL will output a human-gene converted Seurat object for download. 
-License: use_mit_license()
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.3.2
