@@ -97,7 +97,7 @@ ui <- fluidPage(
                                                  sidebarLayout(
                                                    sidebarPanel(
                                                      fileInput("file", "Choose RDS File"),
-                                                     selectInput("species", "Select Species", choices = c("Mouse", "Zebrafish","Rat","Human","Custom"), selected = "Mouse"),
+                                                     selectInput("species", "Select Input Species", choices = c("Mouse", "Zebrafish","Rat","Human","Custom"), selected = "Mouse"),
                                                      conditionalPanel(
                                                        condition = "input.species == 'Custom'",
                                                        tags$div(textInput("customEnsemblId", "Enter Ensembl ID", placeholder = "e.g., mmusculus_gene_ensembl"), class = "text-input"),
@@ -106,7 +106,8 @@ ui <- fluidPage(
                                                      ),
                                                      selectInput("Selected_assay", "Select Assay", choices = c("RNA", "SCT", "Spatial", "Integrated","alra"), selected = "RNA"),
                                                      #selectInput("Select_model", "Select Data type", choices = c("scRNAseq","snRNAseq","spatial transcriptomics","patient derived xenograft or PDX"),selected = "No Selection required"),
-                                                     selectInput("Select_model", "Run in PDX mode?", choices = c("Patient Derived Xenograft (PDX)","No Selection required"),selected = "No Selection required"),
+                                                     # selectInput("Select_model", "Run in PDX mode?", choices = c("Patient Derived Xenograft (PDX)","No Selection required"),selected = "No Selection required"),
+                                                     selectInput("Select_model", "Run in PDX mode?", choices = c("Yes","No"),selected = "No"),
                                                      #using bootstrap to make it more app like %structure%
                                                      div(class = "form-group",
                                                          conditionalPanel(condition = 'output.seuratLoaded',
