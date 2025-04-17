@@ -1,4 +1,4 @@
-# License agreement
+## License agreement
 
 1. The Board of Trustees of the Georgetown University provides OrthologAL software and code (“Service”) free of charge for non-commercial use only. Use of the Service by any commercial entity for any purpose, including research, is prohibited.
 2. By using the Service, you agree to be bound by the terms of this Agreement. Please read it carefully.
