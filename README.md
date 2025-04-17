@@ -1,4 +1,5 @@
 # License agreement
+
 1. The Board of Trustees of the Georgetown University provides OrthologAL software and code (“Service”) free of charge for non-commercial use only. Use of the Service by any commercial entity for any purpose, including research, is prohibited.
 2. By using the Service, you agree to be bound by the terms of this Agreement. Please read it carefully.
 3. You agree not to use the Service for commercial advantage, or in the course of for-profit activities.You agree not to use the Service on behalf of any organization that is not a non-profit organization. Commercial entities wishing to use this Service should
@@ -9,7 +10,9 @@ YOU HEREBY AGREE TO DEFEND AND INDEMNIFY GEORGETOWN UNIVERSITY, ITS TRUSTEES, EM
 6. You agree that this Agreement and any dispute arising under it is governed by the laws of the State of Washington DC, United States of America, applicable to agreements negotiated, executed, and performed within DC.
 7. Subject to your compliance with the terms and conditions set forth in this Agreement, Georgetown University grants you a revocable, non-exclusive, non-transferable right to access and make use of the Service.
 
-# OrthologAL Package
+
+
+# The OrthologAL R Package
 
 ## Table of Contents
 
