@@ -114,9 +114,6 @@ OrthologAL::RunOrthologAL()
     <img src="https://github.com/user-attachments/assets/8f48486f-000f-4c14-8a81-2a27e1e39675">
 </p>
 
-![Screenshot 2024-10-25 at 3 01 28 PM](https://github.com/user-attachments/assets/8f48486f-000f-4c14-8a81-2a27e1e39675)
-
-
 ### Step 5: Click on Convert
 - The conversion is complete when the status symbol is green. 
 
