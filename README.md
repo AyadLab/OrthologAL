@@ -84,6 +84,9 @@ OrthologAL::RunOrthologAL()
 ## 5. The OrthologAl App 
   
 ### Step 1: Upload a Seurat object.
+- Example data used here is rat SCI single-cell rnaseq (Assay : RNA and species : RAT )
+[![Download Data File](https://img.shields.io/badge/download-data--file-green)](https://drive.google.com/drive/folders/1icVieksEhdIUTEqkVSHZEfQxhfmKxU3m?usp=sharing)
+
 <p align="center">
     <img src="https://github.com/user-attachments/assets/1ad8b909-b898-4c5c-a3ce-48581fd035d3">
 </p>
@@ -115,13 +118,9 @@ OrthologAL::RunOrthologAL()
 </p>
 
 ### Step 5: Click on Convert
-- The conversion is complete when the status symbol is green. 
-
-### Step 6 : Input
-- Example data used here is rat SCI single-cell rnaseq (Assay : RNA and species : RAT )
-[![Download Data File](https://img.shields.io/badge/download-data--file-green)](https://drive.google.com/drive/folders/1icVieksEhdIUTEqkVSHZEfQxhfmKxU3m?usp=sharing)
-
-### Step 7 : Outputs
+- The conversion is complete when the status symbol is green.
+  
+### Step 6 : Outputs
 
 #### Output Seurat Object .RDS
 - Once the conversion process is completed, a download button will appear, allowing you to download an ortholog converted Seurat object. The ortholog converted expression data will be stored in a new assay / slot / layer corresponding to the input assay / slot/ layer. i.e., RNA assay input, RNA_ortho output. 
