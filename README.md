@@ -126,8 +126,9 @@ OrthologAL::RunOrthologAL()
 #### Output Seurat Object .RDS
 - Once the conversion process is completed, a download button will appear, allowing you to download an ortholog converted Seurat object. The ortholog converted expression data will be stored in a new assay / slot / layer corresponding to the input assay / slot/ layer. i.e., RNA assay input, RNA_ortho output. 
 
-- We get the pie chart which shows Biomart species genes with human orthologous gene Distribution and converted data gene distribution
-![Artboard 1](https://github.com/user-attachments/assets/84704a2a-498c-4041-8a92-650797567329)
+#### Quality Control Metrics
+- OrthologAL displays pie charts, showing the biotype distribution of input species genes with human orthologous gene annotations in the BioMart DB, as well as in the context of the converted dataset.
+- ![Artboard 1](https://github.com/user-attachments/assets/84704a2a-498c-4041-8a92-650797567329)
 - Also shows protein coding genes overlap between BioMart Database and data uploaded
   ![Screenshot 2024-10-25 at 3 05 40 PM](https://github.com/user-attachments/assets/544ace45-db5c-4a60-9863-185148d20cc5)
 - The system generates a summary table displaying both successfully matched genes and those without positive matches. This table is available to download as a .CSV file from within the application.
