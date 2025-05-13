@@ -101,13 +101,18 @@ OrthologAL::RunOrthologAL()
 ### Step 3: Select the assay supported by the seurat object uploaded in step 1
 
 - From a dropdown of 'assays' present in your Seurat object, select the appropriate assay you wish to map to human orthologs (i.e. 'RNA'). The ortholog converted assay will use the notation InputAssay_ortho (i.e. 'RNA_ortho'). 
-
-<img width="249" alt="Screenshot 2024-11-01 at 9 29 11 AM" src="https://github.com/user-attachments/assets/441d1914-f520-40a3-b2f2-4b51958086b2">
+<p align="center">
+    <img width="249" alt="Screenshot 2024-11-01 at 9 29 11 AM" src="https://github.com/user-attachments/assets/441d1914-f520-40a3-b2f2-4b51958086b2">
+</p>
 
 ### (Optional) Step 4: PDX (Patient-Derived Xenogfraf) mode. 
 
 - If your input data contains both human and non-human cells/tissue, select 'PDX mode'. 
 - No selection required for single-species datasets.
+
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/8f48486f-000f-4c14-8a81-2a27e1e39675">
+</p>
 
 ![Screenshot 2024-10-25 at 3 01 28 PM](https://github.com/user-attachments/assets/8f48486f-000f-4c14-8a81-2a27e1e39675)
 
