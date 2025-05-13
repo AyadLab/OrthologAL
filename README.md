@@ -43,7 +43,7 @@ OrthologAL will be broadly useful for integrating pre-clinical, high-dimensional
 - PDX harmonization
 - Quality control metrics
 
-### 3. Prerequisites
+## 3. Prerequisites
 You will need to install the following dependencies. 
 ```r
 if (!require("BiocManager", quietly = TRUE))
@@ -81,7 +81,7 @@ library(OrthologAL)
 OrthologAL::RunOrthologAL()
 ```
 
-### 5. The OrthologAl App 
+## 5. The OrthologAl App 
   
 ### Step 1: Upload a Seurat object.
 <p align="center">
@@ -121,7 +121,7 @@ OrthologAL::RunOrthologAL()
 - Example data (Assay : RNA and species : RAT )
 [![Download Data File](https://img.shields.io/badge/download-data--file-green)](https://drive.google.com/drive/folders/1icVieksEhdIUTEqkVSHZEfQxhfmKxU3m?usp=sharing)
 
-## Output Seurat Object .RDS
+#### Output Seurat Object .RDS
 - Once the conversion process is completed, a download button will appear, allowing you to download an ortholog converted Seurat object. The ortholog converted expression data will be stored in a new assay / slot / layer corresponding to the input assay / slot/ layer. i.e., RNA assay input, RNA_ortho output. 
 
 - We get the pie chart which shows Biomart species genes with human orthologous gene Distribution and converted data gene distribution
