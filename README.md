@@ -121,6 +121,9 @@ OrthologAL::RunOrthologAL()
 - Example data (Assay : RNA and species : RAT )
 [![Download Data File](https://img.shields.io/badge/download-data--file-green)](https://drive.google.com/drive/folders/1icVieksEhdIUTEqkVSHZEfQxhfmKxU3m?usp=sharing)
 
+- Output Seurat Object .RDS
+-     Once the conversion process is completed, a download button will appear, allowing you to download an ortholog converted Seurat object. The ortholog converted expression data will be stored in a new assay / slot / layer corresponding to the input assay / slot/ layer. i.e., RNA assay input, RNA_ortho output. 
+
 - We get the pie chart which shows Biomart species genes with human orthologous gene Distribution and converted data gene distribution
 ![Artboard 1](https://github.com/user-attachments/assets/84704a2a-498c-4041-8a92-650797567329)
 - Also shows protein coding genes overlap between BioMart Database and data uploaded
