@@ -117,7 +117,7 @@ server <- function(input, output) {
       #Necessary to paste the gene symbols here, as the current PDOX model objects have these symbols attached to them to recognize the MM10/HG38 IDENTIFIER##################################################################
       converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
       converted$HGNC.symbol <- paste0("hg38-", converted$HGNC.symbol)
-      hasspecies <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]])@counts %in% converted[[species_sym]])
+      hasspecies <- which(rownames(counts_matrix) %in% converted[[species_sym]])
       tmp.counts <- get_counts_matrix(obj,assay)[hasspecies,]
     }
     else {
