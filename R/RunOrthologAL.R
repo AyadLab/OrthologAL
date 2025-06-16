@@ -156,12 +156,12 @@ RunOrthologAL <- function() {
       #species_sym gives us the gene symbol of species using the function species_symbol which is strip split function#####################################################################
       species_sym <- species_symbol(species_info[[2]])
       #Selecting the PDOX model on the app which has two species information (human and mouse/rat/zebrafish) in the seurat object,but we just need to convert the species data into human##########
-      if (input$Select_model == "patient derived xenograft or PDX") {
+      if (input$Select_model == "Patient Derived Xenograft (PDX)") {
         print("PDOX model to convert species to human gene set successful......")
         #Necessary to paste the gene symbols here, as the current PDOX model objects have these symbols attached to them to recognize the MM10/HG38 IDENTIFIER##################################################################
         converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
         converted$HGNC.symbol <- paste0("hg38-", converted$HGNC.symbol)
-        hasspecies <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]])@counts %in% converted[[species_sym]])
+        hasspecies <- which(rownames(counts_matrix) %in% converted[[species_sym]])
         tmp.counts <- get_counts_matrix(obj,assay)[hasspecies,]
       }
       else {
