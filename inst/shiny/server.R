@@ -63,11 +63,28 @@ server <- function(input, output) {
     gene_all <- sub("^hg38-|^mm10-", "", genes)
     if (input$species != "Custom") {
       # Use attributes and filters based on selected species
+
       species_lookup <- data.frame(
-        Mouse = c(ensembl_id = "mmusculus_gene_ensembl", attributes = 'mgi_symbol', filters = 'mgi_symbol'),
-        Human = c(ensembl_id = "hsapiens_gene_ensembl", attributes = 'ensembl_gene_id', filters = 'ensembl_gene_id'),
-        Zebrafish = c(ensembl_id = "drerio_gene_ensembl", attributes = 'zfin_id_symbol', filters = 'zfin_id_symbol'),
-        Rat = c(ensembl_id = "rnorvegicus_gene_ensembl", attributes = 'rgd_symbol', filters = 'rgd_symbol'),
+        Mouse = c(
+          ensembl_id = "mmusculus_gene_ensembl",
+          attributes = 'mgi_symbol',
+          filters = 'mgi_symbol',
+          filename = "data/ortho_df_Mouse_Human.rds"  # <--- Specific file for Mouse
+        ),
+        Zebrafish = c(
+          ensembl_id = "drerio_gene_ensembl",
+          attributes = 'zfin_id_symbol',
+          filters = 'zfin_id_symbol',
+          filename = "data/ortho_df_Zebrafish_Human.rds"      # <--- Specific file for Zebrafish
+        ),
+        Rat = c(
+          ensembl_id = "rnorvegicus_gene_ensembl",
+          attributes = 'rgd_symbol',
+          filters = 'rgd_symbol',
+          filename = "data/ortho_df_Rat_Human.rds"            # <--- Specific file for Rat
+        ),
+        # You generally don't need a "Human" column here if Human is always the target,
+        # but if you keep it, just add the human filename.
         stringsAsFactors = FALSE
       )
       species_info <- species_lookup[[input$species]]
@@ -87,30 +104,30 @@ server <- function(input, output) {
         stringsAsFactors = FALSE
       )
     }
-    #We get the species gene list from biomart server using useEnsembl function and converted variable helps us to create a dataframe of genes names equivalent of species used and human gene
-    ######## tested on different biomart servers ########
-    #mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
-    # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
-    mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast',host = "https://nov2020.archive.ensembl.org")
-    mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://nov2020.archive.ensembl.org")
-    converted <- biomaRt::getLDS(
-      attributes =  c(species_info[[2]],"gene_biotype"),
-      filters = species_info[[3]],
-      values = as.character(gene_all),
-      mart = mart.species,
-      attributesL = c('hgnc_symbol'),
-      martL = mart.human,
-      uniqueRows = T
-    )
-    print(class(converted))
-    print(str(converted))
-    species_symbol <- function(attr) {
+    species_file_name <- species_info[4]
+    # Use system.file to find the file inside the installed package's extdata folder
+    file_path <- system.file("extdata", species_file_name, package = "OrthologAL")
+
+    # Check if the file was actually found (system.file returns "" if not found)
+    if (file_path != "") {
+      master_ref <- readRDS(file_path)
+      print(paste("Successfully loaded from package:", species_file_name))
+    } else {
+      # Provide a helpful error message for debugging
+      stop(paste("Critical Error: File", species_file_name,
+                 "not found in package 'extdata' folder. Check package installation."))
+    }
+   species_symbol <- function(attr) {
       parts <- strsplit(attr, "_")[[1]]
       formatted <- paste0(toupper(parts[1]), ".symbol")
       return(formatted)
     }
     #species_sym gives us the gene symbol of species using the function species_symbol which is strip split function#####################################################################
     species_sym <- species_symbol(species_info[[2]])
+    converted <- master_ref[master_ref[[species_sym]] %in% as.character(gene_all), ]
+    converted <- converted[!duplicated(converted[[species_sym]]), ]
+    print(class(converted))
+    print(str(converted))
     #Selecting the PDOX model on the app which has two species information (human and mouse/rat/zebrafish) in the seurat object,but we just need to convert the species data into human##########
     if (input$Select_model == "Yes") {
       print("PDOX model to convert species to human gene set successful......")
@@ -122,30 +139,23 @@ server <- function(input, output) {
     }
     else {
       print("Running in 'normal' mode, if input data is dual-species, please select to run in PDX mode!")
-      #tmp.counts <- obj[[assay]]@counts
-      length(rownames(obj))
-      length(converted[[species_sym]])
       genes_present_converted <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]]@counts) %in% converted[[species_sym]])
       tmp.counts <- get_counts_matrix(obj,assay)[genes_present_converted,]
     }
-    species_genes <- getBM(
-      attributes = c(species_info[[2]],"ensembl_gene_id", "gene_biotype"),
-      uniqueRows = TRUE,
-      mart = mart.species
-    )
-    symbol_id <- species_info[[2]]
-    species_converted_hg <-  biomaRt::getLDS(
-      attributes =  c(species_info[[2]],"gene_biotype","ensembl_gene_id"),
-      filters = species_info[[3]],
-      values = species_genes[[symbol_id]],
-      mart = mart.species,
-      attributesL = c('hgnc_symbol'),
-      martL = mart.human,
-      uniqueRows = T
-    )
+
+    species_genes <- master_ref
+    #  Replicate the species_converted_hg logic
+    # In your local master_ref, this is basically the whole table already.
+    # This replaces species_converted_hg <- biomaRt::getLDS(...)
+    species_converted_hg <- master_ref
+    # Handle the 'unique human genes' for the Database Distribution plot
+    # code uses 'HGNC.symbol' and 'Gene.type'
     converted_unique_h <- species_converted_hg[!duplicated(species_converted_hg$HGNC.symbol), ]
+    # Generate the Classification Tables for the Plots
+    # Graph 1: Distribution of the genes in your uploaded dataset
     gene_classification <- as.data.frame(table(converted$Gene.type))
     colnames(gene_classification) <- c("Gene_Type", "Freq")
+    # Graph 2: Distribution of all genes in the local Database (the .rds file)
     gene_classification_DB <- as.data.frame(table(converted_unique_h$Gene.type))
     colnames(gene_classification_DB) <- c("Gene_Type", "Freq")
 
@@ -175,8 +185,8 @@ server <- function(input, output) {
     converted_unique <- converted[!duplicated(converted$HGNC.symbol), ]
     ortho_class_Data <- as.data.frame(table(converted_unique$Gene.type))
     colnames(ortho_class_Data) <- c("Gene_Type", "Freq")
-    dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein_coding", "Freq"]
-    biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein_coding", "Freq"] #17,620
+    dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein-coding", "Freq"]
+    biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein-coding", "Freq"] #17,620
     matched <- dataset_pco/biomart_ortho_pco_mouse * 100
     unmatched <- 100 - matched
     pie_data <- data.frame(
@@ -255,8 +265,8 @@ server <- function(input, output) {
     if (assay == "Spatial") {
       tmp@images <- obj@images
     }
-    #tmp <- NormalizeData(tmp)
-    #tmp <- ScaleData(tmp)
+    # tmp <- NormalizeData(tmp,assay = updated_assay_name)
+    # tmp <- ScaleData(tmp,assay= updated_assay_name)
     convertedData(tmp)
   })
   output$status <- renderUI({
@@ -282,3 +292,7 @@ server <- function(input, output) {
     }
   )
 }
+
+
+
+

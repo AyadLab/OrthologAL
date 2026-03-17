@@ -18,7 +18,7 @@
 #Packages required to load
 #Seurat V5 version used and this app supports v3/v4 versions too
 #Call OrthoConvo function to convert the seurat object of any species to human
-RunOrthologAL <- function() {
+RunOrthologAL <- function(){
   library(shiny)
   library(Seurat)
   library(biomaRt)
@@ -72,13 +72,31 @@ RunOrthologAL <- function() {
       )
     )
   )
-
   server <- function(input, output) {
     convertedData <- reactiveVal(NULL)
+
+    obj <- reactive({
+      req(input$file)
+      readRDS(input$file$datapath)
+    })
+
+    # rks
+    sl <- reactive({
+      if (class(obj()) == "Seurat"){
+        return(NULL)
+      }
+    })
+    output$seuratLoaded <- reactive({
+      return(is.null(sl()))
+    })
+    outputOptions(output, 'seuratLoaded', suspendWhenHidden = FALSE)
+
+    # load object as reactive for input into observe event
+
     observeEvent(input$convertButton, {
       obj <- reactiveVal()
       req(input$file)
-      obj <- readRDS(input$file$datapath)
+      obj <- readRDS(input$file$datapath) # obj() #
       assay <- input$Selected_assay
       print(assay)
       get_counts_matrix <- function(obj, assay) {
@@ -107,32 +125,25 @@ RunOrthologAL <- function() {
       gene_all <- sub("^hg38-|^mm10-", "", genes)
       if (input$species != "Custom") {
         # Use attributes and filters based on selected species
-        # species_lookup <- data.frame(
-        #   Mouse = c(ensembl_id = "mmusculus_gene_ensembl", attributes = 'mgi_symbol', filters = 'mgi_symbol'),
-        #   Human = c(ensembl_id = "hsapiens_gene_ensembl", attributes = 'ensembl_gene_id', filters = 'ensembl_gene_id'),
-        #   Zebrafish = c(ensembl_id = "drerio_gene_ensembl", attributes = 'zfin_id_symbol', filters = 'zfin_id_symbol'),
-        #   Rat = c(ensembl_id = "rnorvegicus_gene_ensembl", attributes = 'rgd_symbol', filters = 'rgd_symbol'),
-        #   stringsAsFactors = FALSE
-        # )
 
         species_lookup <- data.frame(
           Mouse = c(
             ensembl_id = "mmusculus_gene_ensembl",
             attributes = 'mgi_symbol',
             filters = 'mgi_symbol',
-            filename = "mart_species_mouse.rds"  # <--- Specific file for Mouse
+            filename = "data/ortho_df_Mouse_Human.rds"  # <--- Specific file for Mouse
           ),
           Zebrafish = c(
             ensembl_id = "drerio_gene_ensembl",
             attributes = 'zfin_id_symbol',
             filters = 'zfin_id_symbol',
-            filename = "mart_zebrafish.rds"      # <--- Specific file for Zebrafish
+            filename = "data/ortho_df_Zebrafish_Human.rds"      # <--- Specific file for Zebrafish
           ),
           Rat = c(
             ensembl_id = "rnorvegicus_gene_ensembl",
             attributes = 'rgd_symbol',
             filters = 'rgd_symbol',
-            filename = "mart_rat.rds"            # <--- Specific file for Rat
+            filename = "data/ortho_df_Rat_Human.rds"            # <--- Specific file for Rat
           ),
           # You generally don't need a "Human" column here if Human is always the target,
           # but if you keep it, just add the human filename.
@@ -157,53 +168,40 @@ RunOrthologAL <- function() {
       }
       #We get the species gene list from biomart server using useEnsembl function and converted variable helps us to create a dataframe of genes names equivalent of species used and human gene
       ######## tested on different biomart servers ########
-      # mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
+      #mart.species <- useEnsembl("ensembl", "rnorvegicus_gene_ensembl", mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
       # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://dec2021.archive.ensembl.org")
-      # # mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast',host = "https://nov2020.archive.ensembl.org")
-       # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://nov2020.archive.ensembl.org")
-      # 1. Clean the input first (Remove NAs, empty strings, duplicates)
-      # This prevents biomaRt from choking on bad data
-
-      # 2. Set Timeout and Hosts
-      # options(timeout = 600)
-      # archive_hosts <- c(
-      #   "https://nov2020.archive.ensembl.org",
-      #   "https://dec2021.archive.ensembl.org",
-      #   "https://jan2024.archive.ensembl.org" # Newer fallback
-      # )
-
+      # mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast',host = "https://nov2020.archive.ensembl.org")
+      # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://nov2020.archive.ensembl.org")
+      #  Define the list of hosts you want to try, in order of preference
+      #
       # mart.human <- useEnsembl("ensembl", "hsapiens_gene_ensembl", mirror = 'useast', host = "https://jan2024.archive.ensembl.org")
       # mart.species <- useEnsembl("ensembl", species_info[[1]], mirror = 'useast',host = "https://jan2024.archive.ensembl.org")
-
-      # Check if file exists to avoid crashing
-      if (file.exists("data/mart_human.rds")) {
-        # Load the master table
-        mart.human  <- readRDS("data/mart_human.rds")
-        print(paste("Successfully loaded the human genes table"))
-
-      } else {
-        stop("The data file  is missing from the data folder.")
-      }
+      # if (file.exists("data/mart_human.rds")) {
+      #   # Load the master table
+      #   mart.human  <- readRDS("data/mart_human.rds")
+      #   print(paste("Successfully loaded the human genes table"))
+      #
+      # } else {
+      #   stop("The data file  is missing from the data folder.")
+      # }
       species_file_name <- species_info[4]
-      file_path <- paste0("data/", f_name)
+      file_path <-  species_file_name
       if (file.exists(file_path)) {
-        mart.species <- readRDS(file_path)
+        master_ref <- readRDS(file_path)
         print(paste("Successfully loaded the :", species_file_name))
       } else {
         stop(paste("File not found:", file_path))
       }
 
-      converted <- biomaRt::getLDS(
-        attributes =  c(species_info[[2]],"gene_biotype"),
-        filters = species_info[[3]],
-        values = as.character(gene_all),
-        mart = mart.species,
-        attributesL = c('hgnc_symbol'),
-        martL = mart.human,
-        uniqueRows = T
-      )
-      print(class(converted))
-      print(str(converted))
+      # converted <- biomaRt::getLDS(
+      #   attributes =  c(species_info[[2]],"gene_biotype"),
+      #   filters = species_info[[3]],
+      #   values = as.character(gene_all),
+      #   mart = mart.species,
+      #   attributesL = c('hgnc_symbol'),
+      #   martL = mart.human,
+      #   uniqueRows = T
+      # )
       species_symbol <- function(attr) {
         parts <- strsplit(attr, "_")[[1]]
         formatted <- paste0(toupper(parts[1]), ".symbol")
@@ -211,8 +209,12 @@ RunOrthologAL <- function() {
       }
       #species_sym gives us the gene symbol of species using the function species_symbol which is strip split function#####################################################################
       species_sym <- species_symbol(species_info[[2]])
+      converted <- master_ref[master_ref[[species_sym]] %in% as.character(gene_all), ]
+      converted <- converted[!duplicated(converted[[species_sym]]), ]
+      print(class(converted))
+      print(str(converted))
       #Selecting the PDOX model on the app which has two species information (human and mouse/rat/zebrafish) in the seurat object,but we just need to convert the species data into human##########
-      if (input$Select_model == "Patient Derived Xenograft (PDX)") {
+      if (input$Select_model == "Yes") {
         print("PDOX model to convert species to human gene set successful......")
         #Necessary to paste the gene symbols here, as the current PDOX model objects have these symbols attached to them to recognize the MM10/HG38 IDENTIFIER##################################################################
         converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
@@ -221,31 +223,49 @@ RunOrthologAL <- function() {
         tmp.counts <- get_counts_matrix(obj,assay)[hasspecies,]
       }
       else {
-        print("No changes needed required here and creating the new Seurat object......")
+        print("Running in 'normal' mode, if input data is dual-species, please select to run in PDX mode!")
         #tmp.counts <- obj[[assay]]@counts
         length(rownames(obj))
         length(converted[[species_sym]])
         genes_present_converted <- which(rownames(tryCatch(obj[[assay]]$counts, error = function(e) NULL) %||% obj[[assay]]@counts) %in% converted[[species_sym]])
         tmp.counts <- get_counts_matrix(obj,assay)[genes_present_converted,]
       }
-      species_genes <- getBM(
-        attributes = c(species_info[[2]],"ensembl_gene_id", "gene_biotype"),
-        uniqueRows = TRUE,
-        mart = mart.species
-      )
-      symbol_id <- species_info[[2]]
-      species_converted_hg <-  biomaRt::getLDS(
-        attributes =  c(species_info[[2]],"gene_biotype","ensembl_gene_id"),
-        filters = species_info[[3]],
-        values = species_genes[[symbol_id]],
-        mart = mart.species,
-        attributesL = c('hgnc_symbol'),
-        martL = mart.human,
-        uniqueRows = T
-      )
+      # species_genes <- getBM(
+      #   attributes = c(species_info[[2]],"ensembl_gene_id", "gene_biotype"),
+      #   uniqueRows = TRUE,
+      #   mart = mart.species
+      # )
+      # symbol_id <- species_info[[2]]
+      # species_converted_hg <-  biomaRt::getLDS(
+      #   attributes =  c(species_info[[2]],"gene_biotype","ensembl_gene_id"),
+      #   filters = species_info[[3]],
+      #   values = species_genes[[symbol_id]],
+      #   mart = mart.species,
+      #   attributesL = c('hgnc_symbol'),
+      #   martL = mart.human,
+      #   uniqueRows = T
+      # )
+      # converted_unique_h <- species_converted_hg[!duplicated(species_converted_hg$HGNC.symbol), ]
+      # gene_classification <- as.data.frame(table(converted$Gene.type))
+      # colnames(gene_classification) <- c("Gene_Type", "Freq")
+      # gene_classification_DB <- as.data.frame(table(converted_unique_h$Gene.type))
+      # colnames(gene_classification_DB) <- c("Gene_Type", "Freq")
+      species_genes <- master_ref
+      #  Replicate the species_converted_hg logic
+      # In your local master_ref, this is basically the whole table already.
+      # This replaces species_converted_hg <- biomaRt::getLDS(...)
+      species_converted_hg <- master_ref
+
+      # 3. Handle the 'unique human genes' for the Database Distribution plot
+      # Your code uses 'HGNC.symbol' and 'Gene.type' (ensure capitalization matches master_ref)
       converted_unique_h <- species_converted_hg[!duplicated(species_converted_hg$HGNC.symbol), ]
+
+      # 4. Generate the Classification Tables for the Plots
+      # Graph 1: Distribution of the genes in your uploaded dataset
       gene_classification <- as.data.frame(table(converted$Gene.type))
       colnames(gene_classification) <- c("Gene_Type", "Freq")
+
+      # Graph 2: Distribution of all genes in the local Database (the .rds file)
       gene_classification_DB <- as.data.frame(table(converted_unique_h$Gene.type))
       colnames(gene_classification_DB) <- c("Gene_Type", "Freq")
 
@@ -254,7 +274,7 @@ RunOrthologAL <- function() {
           geom_bar(width = 1, stat = "identity") +
           coord_polar(theta = "y") +
           scale_fill_viridis(discrete = TRUE, option = "turbo") +
-          theme_void() + labs(title = "Biomart species genes \n with human orthologous gene Distribution ") +  theme(
+          theme_void() + labs(title = "Species DB Distribution ") +  theme(
             plot.title = element_text(hjust = 0.5, size = 15, face = "bold", margin = margin(b = 10)),
             legend.title = element_text(size = 14, face = "bold"),
             legend.text = element_text(size = 12))
@@ -264,7 +284,7 @@ RunOrthologAL <- function() {
           coord_polar(theta = "y") +
           scale_fill_viridis(discrete = TRUE, option = "turbo") +
           theme_void() +
-          labs(title = "After conversion genes Distribution")  +  theme(
+          labs(title = "Dataset converted Distribution")  +  theme(
             plot.title = element_text(hjust = 0.5, size = 15, face = "bold", margin = margin(b = 10)),
             legend.title = element_text(size = 14, face = "bold"),
             legend.text = element_text(size = 12))
@@ -275,8 +295,8 @@ RunOrthologAL <- function() {
       converted_unique <- converted[!duplicated(converted$HGNC.symbol), ]
       ortho_class_Data <- as.data.frame(table(converted_unique$Gene.type))
       colnames(ortho_class_Data) <- c("Gene_Type", "Freq")
-      dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein_coding", "Freq"]
-      biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein_coding", "Freq"] #17,620
+      dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein-coding", "Freq"]
+      biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein-coding", "Freq"] #17,620
       matched <- dataset_pco/biomart_ortho_pco_mouse * 100
       unmatched <- 100 - matched
       pie_data <- data.frame(
@@ -329,6 +349,13 @@ RunOrthologAL <- function() {
           write.csv(data.frame(data_df), file, row.names = FALSE)
         }
       )
+
+      # condition for genes list download button...
+      output$genes_list_ready <- reactive({
+        return(!is.null(data_df))
+      })
+      outputOptions(output, 'genes_list_ready', suspendWhenHidden = FALSE)
+
       converted[[species_sym]] <- as.character(converted[[species_sym]])
       converted$HGNC.symbol <- as.character(converted$HGNC.symbol)
       #mapping required to convert species rownames from the object to human and use these tmp.counts to create a new seurat object which only has human gene information
@@ -354,9 +381,9 @@ RunOrthologAL <- function() {
     })
     output$status <- renderUI({
       if (!is.null(convertedData())) {
-        tags$span("Conversion completed. You can now download the Orthogonal RDS file.", style = "color: green;")
+        tags$span("Conversion completed. You can now download the OrthologAL converted Seurat object.", style = "color: green;")
       } else {
-        tags$span("Upload an RDS file and click 'Convert' to start the conversion.", style = "color: blue;")
+        tags$span("Upload an RDS file. Once loaded, click 'Convert' to start.", style = "color: blue;")
       }
     })
     output$download_visibile_in_main_page <- renderUI({
@@ -376,4 +403,5 @@ RunOrthologAL <- function() {
     )
   }
   shinyApp(ui, server)
-}
+  }
+
