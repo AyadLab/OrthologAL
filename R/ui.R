@@ -7,13 +7,15 @@ library(bslib)
 library(DT)
 library(ggplot2)
 library(viridis)
+library(shinyFiles) # Added shinyFiles package
+
+options(shiny.maxRequestSize = 80000 * 1024^2) # to increase the upload size of seurat object
 
 ui <- fluidPage(
-
+  
   tags$script(src = "https://kit.fontawesome.com/070e476711.js"),
   titlePanel("OrthologAL", windowTitle = "OrthologAL"),
   hr(),
-  # br(),
   tags$head(tags$style(HTML(
     ".nav.nav-pills.nav-stacked > .active > a, .nav.nav-pills.nav-stacked > .active > a:hover {
     background-color: #000000;
@@ -30,12 +32,12 @@ ui <- fluidPage(
       -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
       box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
       font-family: 'sans-serif', Arial Rounded MT Bold;
-
   }
-
-                            "))),
+  "))),
+  
   navlistPanel(well = T, fluid = T, widths = c(2, 8),
-               # tags$head(tags$style(HTML(".tab-content { height: 83vh; overflow-y: auto !important; }" ))),
+               
+               # ---------------- OVERVIEW TAB ----------------
                tabPanel(tags$div(
                  tags$i(class = "fa-sharp fa-solid fa-desktop"),
                  tags$span("- Overview"),
@@ -47,8 +49,7 @@ ui <- fluidPage(
                br(),
                p("The OrthologAL package leverages the data mining tool biomaRt to access different gene sets from ENSEMBL, and facilitates the interaction with these servers."),
                br(),
-               p("Researchers can effortlessly input their Seurat object, a standard datatype format for single-cell RNA sequencing (scRNAseq), single-nuclei RNA sequencing (snRNAseq), or spatial transcriptomics (stRNAseq) data of any species, and
-           OrthologAL will output a human-gene converted Seurat object for download."),
+               p("Researchers can effortlessly input their Seurat object, a standard datatype format for single-cell RNA sequencing (scRNAseq), single-nuclei RNA sequencing (snRNAseq), or spatial transcriptomics (stRNAseq) data of any species, and OrthologAL will output a human-gene converted Seurat object for download."),
                br(),
                p("Uniquely, OrthologAL can process dual-species model data, such as PDXs which may contain host cells/tissue as well as human tumor."),
                br(),
@@ -58,24 +59,23 @@ ui <- fluidPage(
                br(),
                br(),
                div(
-               a(href="https://github.com/AyadLab", "Keep up-to-date with the most recent release of OrthologAL at The Ayad lab GitHub", style = "font-size: 18px; font-weight: bold;"),
-               style = "text-align: center;"),
+                 a(href="https://github.com/AyadLab", "Keep up-to-date with the most recent release of OrthologAL at The Ayad lab GitHub", style = "font-size: 18px; font-weight: bold;"),
+                 style = "text-align: center;"),
                hr(),
                ),
-
+               
+               # ---------------- RUN APP TAB ----------------
                tabPanel(tags$div(
                  tags$i(class="fa-sharp fa-solid fa-magnifying-glass-chart"),
                  tags$span("- Run OrthologAL")
-               ), #put contents for actual application here
-               ######################################################################################################################
-
+               ), 
+               
                conditionalPanel(condition = "!input.acceptAgreement",
                                 h1("OrthologAL User Agreement"),
                                 hr(),
                                 br(),
                                 h1("License Agreement"),
-                                # hr(),
-                                br(), # Note this is a draft... I dont know if this is right. Not a lawyer!
+                                br(), 
                                 p(strong("1. The Board of Trustees of the Georgetown University (“Georgetown”) provides OrthologAL software and code (“Service”) free of charge for non-commercial use only. Use of the Service by any commercial entity for any purpose, including research, is prohibited.")),
                                 p(strong("2. By using the Service, you agree to be bound by the terms of this Agreement. Please read it carefully.")),
                                 p(strong("3. You agree not to use the Service for commercial advantage, or in the course of for-profit activities. You agree not to use the Service on behalf of any organization that is not a non-profit organization. Commercial entities wishing to use this Service should contact Georgetown University’s Office of Technology Licensing.")),
@@ -83,82 +83,91 @@ ui <- fluidPage(
                                 p(strong("5. All rights not expressly granted to you in this Agreement are reserved and retained by GEORGETOWN or its licensors or content providers. This Agreement provides no license under any patent.")),
                                 p(strong("6. You agree that this Agreement and any dispute arising under it is governed by the laws of the District of Columbia, United States of America, applicable to agreements negotiated, executed, and performed within the DISTRICT OF COLUMBIA")),
                                 p(strong("7. Subject to your compliance with the terms and conditions set forth in this Agreement, GEORGETOWN grants you a revocable, non-exclusive, non-transferable right to access and make use of the Service.")),
-                                # hr(),
                                 br(),
                                 p(em("Do you accept the terms and conditions in this agreement?")),
                                 fluidRow(column(width = 4, actionButton(inputId = "acceptAgreement", label = "Accept")), column(width = 4, actionButton(inputId = "rejectAgreement", label = "Reject and close"))),
                                 conditionalPanel(condition = "input.acceptAgreement",
                                                  "Please scroll down for instructions."),
-                                # hr(),
                                 br()),
-                                # agreement accepted, run app
-                                conditionalPanel(condition = "input.acceptAgreement",
-                                                 titlePanel("OrthologAL", windowTitle = "OrthologAL"),
-                                                 sidebarLayout(
-                                                   sidebarPanel(
-                                                     fileInput("file", "Choose RDS File"),
-                                                     selectInput("species", "Select Input Species", choices = c("Mouse", "Zebrafish","Rat","Human","Custom"), selected = "Mouse"),
-                                                     conditionalPanel(
-                                                       condition = "input.species == 'Custom'",
-                                                       tags$div(textInput("customEnsemblId", "Enter Ensembl ID", placeholder = "e.g., mmusculus_gene_ensembl"), class = "text-input"),
-                                                       tags$div(textInput("customAttributes", "Enter Attributes", placeholder = "e.g., mgi_symbol"), class = "text-input"),
-                                                       tags$div(textInput("customFilters", "Enter Filters (Optional)", placeholder = "e.g., mgi_symbol"), class = "text-input")
-                                                     ),
-                                                     selectInput("Selected_assay", "Select Assay", choices = c("RNA", "SCT", "Spatial", "Integrated","alra"), selected = "RNA"),
-                                                     #selectInput("Select_model", "Select Data type", choices = c("scRNAseq","snRNAseq","spatial transcriptomics","patient derived xenograft or PDX"),selected = "No Selection required"),
-                                                     # selectInput("Select_model", "Run in PDX mode?", choices = c("Patient Derived Xenograft (PDX)","No Selection required"),selected = "No Selection required"),
-                                                     selectInput("Select_model", "Run in PDX mode?", choices = c("Yes","No"),selected = "No"),
-                                                     #using bootstrap to make it more app like %structure%
-                                                     div(class = "form-group",
-                                                         conditionalPanel(condition = 'output.seuratLoaded',
-                                                                          actionButton("convertButton", "Convert", class = "btn btn-primary btn-block")
-                                                         )
-                                                     ),
-                                                     uiOutput("download_visibile_in_main_page"),
-                                                   ),
-                                                   mainPanel(
-                                                     code("status"),
-                                                     uiOutput("status"),
-                                                     br(),
-                                                     navset_pill(
-                                                       #title = "OUTPUT",
-                                                       # Panel with plot ----
-                                                       nav_panel("Genetype Plot", plotOutput("gene_type")),
-                                                       nav_panel("% Match Plot", plotOutput("pieChart")),
-                                                       #nav_panel("Genes Detected",plotOutput("genesdetected")),
-                                                       # Panel with table ----
-                                                       nav_panel("Table", DTOutput("geneTable"))
-                                                     ),
-                                                     conditionalPanel(condition = 'output.genes_list_ready',
-                                                                      downloadButton("download_geneslist", "Download Genes Mapping list")
-                                                     )
-
-
-                                                   )
-                                                 )
-
-                                ) # end condition acccepted agreement
+               
+               # agreement accepted, run app
+               conditionalPanel(condition = "input.acceptAgreement",
+                                titlePanel("OrthologAL", windowTitle = "OrthologAL"),
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    
+                                    # --- NEW UPLOAD SOURCE SELECTOR ---
+                                    radioButtons("upload_source", "Select Data Source:",
+                                                 choices = c("Upload from Computer" = "local",
+                                                             "Browse Server Files (Latch)" = "server")),
+                                    
+                                    # Local Upload
+                                    conditionalPanel(
+                                      condition = "input.upload_source == 'local'",
+                                      fileInput("file_local", "Choose RDS File", accept = c(".rds", ".RDS"))
+                                    ),
+                                    
+                                    # Server/Latch Upload (shinyFiles)
+                                    conditionalPanel(
+                                      condition = "input.upload_source == 'server'",
+                                      shinyFilesButton("file_server", "Browse Server Files", "Please select an RDS file", multiple = FALSE),
+                                      tags$div(tags$b("Selected file:"), textOutput("selected_server_file"), style = "margin-bottom: 15px; margin-top: 5px;")
+                                    ),
+                                    # ----------------------------------
+                                    
+                                    selectInput("species", "Select Input Species", choices = c("Mouse", "Zebrafish","Rat","Human","Custom"), selected = "Mouse"),
+                                    conditionalPanel(
+                                      condition = "input.species == 'Custom'",
+                                      tags$div(textInput("customEnsemblId", "Enter Ensembl ID", placeholder = "e.g., mmusculus_gene_ensembl"), class = "text-input"),
+                                      tags$div(textInput("customAttributes", "Enter Attributes", placeholder = "e.g., mgi_symbol"), class = "text-input"),
+                                      tags$div(textInput("customFilters", "Enter Filters (Optional)", placeholder = "e.g., mgi_symbol"), class = "text-input")
+                                    ),
+                                    selectInput("Selected_assay", "Select Assay", choices = c("RNA", "SCT", "Spatial", "Integrated","alra"), selected = "RNA"),
+                                    selectInput("Select_model", "Run in PDX mode?", choices = c("Yes","No"),selected = "No"),
+                                    
+                                    div(class = "form-group",
+                                        conditionalPanel(condition = 'output.seuratLoaded',
+                                                         actionButton("convertButton", "Convert", class = "btn btn-primary btn-block")
+                                        )
+                                    ),
+                                    uiOutput("download_visibile_in_main_page")
+                                  ),
+                                  mainPanel(
+                                    code("status"),
+                                    uiOutput("status"),
+                                    br(),
+                                    navset_pill(
+                                      nav_panel("Genetype Plot", plotOutput("gene_type")),
+                                      nav_panel("% Match Plot", plotOutput("pieChart")),
+                                      nav_panel("Table", DTOutput("geneTable"))
+                                    ),
+                                    conditionalPanel(condition = 'output.genes_list_ready',
+                                                     downloadButton("download_geneslist", "Download Genes Mapping list")
+                                    )
+                                  )
+                                )
+               ) # end condition accepted agreement
                ), # end app tab
-
+               
+               # ---------------- GITHUB TAB ----------------
                tabPanel(tags$div(
                  tags$i(class = "fa-brands fa-github"),
                  tags$span("- Github")
-               ), # put contents for R package installation here
+               ), 
                h1("The OrthologAL R Package"),
                br(),
                div(
                  a(href="https://github.com/AyadLab", "Keep up-to-date with the most recent release of OrthologAL at The Ayad lab GitHub", style = "font-size: 18px; font-weight: bold;"),
-                 style = "text-align: center;"),
-
+                 style = "text-align: center;")
                ),
-
+               
+               # ---------------- CONTACT TAB ----------------
                tabPanel(tags$div(
                  tags$i(class="fa-sharp fa-solid fa-envelope"),
                  tags$span("- Contact")
-               ), #put contents for Contact here
+               ), 
                splitLayout(
                  wellPanel(
-                   # hr(),
                    br(),
                    div(
                      p(strong("Rishika Chowdary, MS")),
@@ -169,12 +178,11 @@ ui <- fluidPage(
                    div(
                      img(src = "rishika.png", width = 185, height = 230),
                      style = "text-align: center;"
-                     ),
+                   ),
                    br(), br(),
                    hr()
                  ),
                  wellPanel(
-                   # hr(),
                    br(),
                    div(
                      p(strong("Robert K. Suter, PhD")),
@@ -182,7 +190,6 @@ ui <- fluidPage(
                      style = "text-align: center;"
                    ),
                    hr(),
-                   # img(src = "rks_headshot_2022.png", width = 185*1.25, height = 160*1.25),
                    div(
                      tags$img(
                        src = "rks_headshot_2022.png",
@@ -201,18 +208,17 @@ ui <- fluidPage(
                    hr()
                  ),
                  wellPanel(
-                   # hr(),
                    br(),
                    div(
                      p(strong("Nagi G. Ayad, PhD")),
                      p(em("Professor, LCCC")),
                      style = "text-align: center;"
-                     ),
+                   ),
                    hr(),
                    div(
                      img(src = "nagi_headshot.png", width = 100*1.4, height = 160*1.4),
                      style = "text-align: center;"
-                     ),
+                   ),
                    br(), br(),
                    div(
                      a(href="mailto:na853@georgetown.edu", "Contact"),
