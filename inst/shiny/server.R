@@ -103,19 +103,19 @@ server <- function(input, output, session) {
           ensembl_id = "mmusculus_gene_ensembl",
           attributes = 'mgi_symbol',
           filters = 'mgi_symbol',
-          filename = "/data/ortho_df_Mouse_Human.rds"  # <--- Specific file for Mouse
+          filename = "ortho_df_Mouse_Human"  # <--- Specific file for Mouse
         ),
         Zebrafish = c(
           ensembl_id = "drerio_gene_ensembl",
           attributes = 'zfin_id_symbol',
           filters = 'zfin_id_symbol',
-          filename = "/data/ortho_df_Zebrafish_Human.rds"      # <--- Specific file for Zebrafish
+          filename = "ortho_df_Zebrafish_Human"      # <--- Specific file for Zebrafish
         ),
         Rat = c(
           ensembl_id = "rnorvegicus_gene_ensembl",
           attributes = 'rgd_symbol',
           filters = 'rgd_symbol',
-          filename = "/data/ortho_df_Rat_Human.rds"            # <--- Specific file for Rat
+          filename = "ortho_df_Rat_Human"            # <--- Specific file for Rat
         ),
         stringsAsFactors = FALSE
       )
@@ -134,15 +134,32 @@ server <- function(input, output, session) {
       )
     }
 
-    species_file_name <- species_info[4]
-    file_path <-  species_file_name
+    #species_file_name <- species_info[4]
+    #file_path <-  species_file_name
+    # 
+    # if (file.exists(file_path)) {
+    #   master_ref <- readRDS(file_path)
+    #   print(paste("Successfully loaded the :", species_file_name))
+    # } else {
+    #   stop(paste("File not found:", file_path))
+    # }
+    # 1. Get the target object name (e.g., "ortho_df_Mouse_Human")
+    target_object_name <- as.character(species_info[4])
     
-    if (file.exists(file_path)) {
-      master_ref <- readRDS(file_path)
-      print(paste("Successfully loaded the :", species_file_name))
-    } else {
-      stop(paste("File not found:", file_path))
-    }
+    tryCatch({
+      # 2. Try to load the .rda file explicitly if it's available locally
+      local_rda_path <- file.path("data", paste0(target_object_name, ".rda"))
+      if (file.exists(local_rda_path)) {
+        load(local_rda_path) 
+      }
+      
+      # 3. get() summons the dataset by its text name
+      master_ref <- get(target_object_name)
+      print(paste0("Successfully loaded .rda object: ", target_object_name))
+      
+    }, error = function(e) {
+      stop(paste0("Critical Error: Could not find dataset '", target_object_name, "'. Make sure it is saved as an .rda file in the data/ folder."))
+    })
     
     species_symbol <- function(attr) {
       parts <- strsplit(attr, "_")[[1]]
@@ -211,8 +228,8 @@ server <- function(input, output, session) {
     converted_unique <- converted[!duplicated(converted$HGNC.symbol), ]
     ortho_class_Data <- as.data.frame(table(converted_unique$Gene.type))
     colnames(ortho_class_Data) <- c("Gene_Type", "Freq")
-    dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein_coding", "Freq"]
-    biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein_coding", "Freq"] 
+    dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein-coding", "Freq"]
+    biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein-coding", "Freq"] 
     matched <- dataset_pco/biomart_ortho_pco_mouse * 100
     unmatched <- 100 - matched
     pie_data <- data.frame(
@@ -307,48 +324,12 @@ server <- function(input, output, session) {
     }
   })
   
-  '''output$download_visibile_in_main_page <- renderUI({
+  output$download_visibile_in_main_page <- renderUI({
     if (!is.null(convertedData())) {
       downloadButton("downloadButton", "Download Converted Data", class = "btn btn-success btn-block mt-3")
     }
-  })'''
-  output$download_visibile_in_main_page <- renderUI({
-    if (!is.null(convertedData())) {
-      tagList(
-        # Standard download to your local computer
-        downloadButton("downloadButton", "Download locally", class = "btn btn-success btn-block mt-3"),
-        
-        # New button to save directly to the Latch/Linux server
-        shinySaveButton("save_server", "Save directly to Server", "Save file as...", filetype = list(RDS = "rds", rds = "rds"), class = "btn btn-info btn-block mt-3")
-      )
-    }
   })
-  # --- SERVER SAVE LOGIC ---
-  # Initialize the save menu with the same server volumes we used for browsing
-  shinyFileSave(input, "save_server", roots = volumes, session = session)
   
-  observeEvent(input$save_server, {
-    # Ensure the user actually clicked "Save" in the pop-up menu
-    req(!is.integer(input$save_server))
-    
-    # Parse the exact folder path and filename the user chose
-    file_info <- parseSavePath(volumes, input$save_server)
-    req(nrow(file_info) > 0)
-    
-    save_path <- as.character(file_info$datapath[1])
-    
-    # Attempt to save the massive object to the server
-    tryCatch({
-      showNotification("Saving massive Seurat object to server. Please wait...", type = "message", duration = 15)
-      
-      saveRDS(convertedData(), file = save_path)
-      
-      showNotification(paste("Successfully saved to:", save_path), type = "message", duration = 10)
-    }, error = function(e) {
-      showNotification(paste("Error saving to server:", e$message), type = "error", duration = 15)
-    })
-  })
-  # -------------------------
   output$downloadButton <- downloadHandler(
     filename = function() {
       if (!is.null(convertedData()))
@@ -360,3 +341,4 @@ server <- function(input, output, session) {
     }
   )
 }
+
