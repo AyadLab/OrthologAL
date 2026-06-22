@@ -65,7 +65,12 @@ You can clone the repository using the git clone in your terminal, or download t
 git clone "https://github.com/AyadLab/OrthologAL.git" 
 cd OrthologAL-main/ 
 ```
-
+<OR>
+    
+You can also install a version where it can take server files too
+```git
+git clone -b server_files_update https://github.com/AyadLab/scFOCAL.git
+```
 ### Step 2: Install the package 
 ```r
 #package installation
