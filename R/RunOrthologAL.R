@@ -252,13 +252,12 @@ RunOrthologAL <- function(){
                  )
     )
   )
-  
   server <- function(input, output, session) {
     convertedData <- reactiveVal(NULL)
     uploaded_filename <- reactiveVal("converted_data.rds")
     
-    # --- shinyFiles Setup ---
-    volumes <- getVolumes()
+    # --- shinyFiles Setup for UPLOADING ---
+    volumes <- getVolumes()() # Ensure you call the function to get the actual volumes list
     shinyFileChoose(input, "file_server", roots = volumes, session = session, filetypes = c('', 'rds', 'RDS'))
     
     output$selected_server_file <- renderText({
@@ -268,6 +267,9 @@ RunOrthologAL <- function(){
         as.character(parseFilePaths(volumes, input$file_server)$datapath[1])
       }
     })
+    
+    # --- shinyFiles Setup for SAVING ---
+    shinyFileSave(input, "save_server_btn", roots = volumes, session = session)
     # ------------------------
     
     # Dynamically load the Seurat object based on which upload method the user selected
@@ -344,19 +346,19 @@ RunOrthologAL <- function(){
             ensembl_id = "mmusculus_gene_ensembl",
             attributes = 'mgi_symbol',
             filters = 'mgi_symbol',
-            filename = "ortho_df_Mouse_Human"  # <--- Specific file for Mouse
+            filename = "ortho_df_Mouse_Human" 
           ),
           Zebrafish = c(
             ensembl_id = "drerio_gene_ensembl",
             attributes = 'zfin_id_symbol',
             filters = 'zfin_id_symbol',
-            filename = "ortho_df_Zebrafish_Human"      # <--- Specific file for Zebrafish
+            filename = "ortho_df_Zebrafish_Human"     
           ),
           Rat = c(
             ensembl_id = "rnorvegicus_gene_ensembl",
             attributes = 'rgd_symbol',
             filters = 'rgd_symbol',
-            filename = "ortho_df_Rat_Human"            # <--- Specific file for Rat
+            filename = "ortho_df_Rat_Human"            
           ),
           stringsAsFactors = FALSE
         )
@@ -375,36 +377,20 @@ RunOrthologAL <- function(){
         )
       }
       
-      #species_file_name <- species_info[4]
-      
-      #species_file_name <- species_info[4]
-      
-      # 1. Get the target object name (e.g., "ortho_df_Mouse_Human")
-      # 1. Get the target object name (e.g., "ortho_df_Mouse_Human")
       target_object_name <- as.character(species_info[4])
       
       tryCatch({
-        # 2. Try to load the .rda file explicitly if it's available locally
         local_rda_path <- file.path("data", paste0(target_object_name, ".rda"))
         if (file.exists(local_rda_path)) {
           load(local_rda_path) 
         }
         
-        # 3. get() summons the dataset by its text name
         master_ref <- get(target_object_name)
         print(paste0("Successfully loaded .rda object: ", target_object_name))
         
       }, error = function(e) {
         stop(paste0("Critical Error: Could not find dataset '", target_object_name, "'. Make sure it is saved as an .rda file in the data/ folder."))
       })
-      #file_path <-  species_file_name
-      
-      # if (file.exists(file_path)) {
-      #   master_ref <- readRDS(file_path)
-      #   print(paste("Successfully loaded the :", species_file_name))
-      # } else {
-      #   stop(paste("File not found:", file_path))
-      # }
       
       species_symbol <- function(attr) {
         parts <- strsplit(attr, "_")[[1]]
@@ -415,27 +401,21 @@ RunOrthologAL <- function(){
       species_sym <- species_symbol(species_info[[2]])
       converted <- master_ref[master_ref[[species_sym]] %in% as.character(gene_all), ]
       converted <- converted[!duplicated(converted[[species_sym]]), ]
-      print(class(converted))
-      print(str(converted))
       
-      # --- CLEANED IF/ELSE BLOCK ---
       if (input$Select_model == "Yes") {
         print("PDOX model to convert species to human gene set successful......")
         converted$MGI.symbol <- paste0("mm10-",converted$MGI.symbol)
         converted$HGNC.symbol <- paste0("hg38-", converted$HGNC.symbol)
         
-        # Use the counts_matrix you already safely extracted!
         hasspecies <- which(rownames(counts_matrix) %in% converted[[species_sym]])
         tmp.counts <- counts_matrix[hasspecies, ]
         
       } else {
         print("Running in 'normal' mode, if input data is dual-species, please select to run in PDX mode!")
         
-        # Use the counts_matrix you already safely extracted!
         genes_present_converted <- which(rownames(counts_matrix) %in% converted[[species_sym]])
         tmp.counts <- counts_matrix[genes_present_converted, ]
       }
-      # ------------------------------
       
       species_genes <- master_ref
       species_converted_hg <- master_ref
@@ -482,7 +462,6 @@ RunOrthologAL <- function(){
         count = c(matched,unmatched)
       )
       
-      # Calculate intersected genes
       matched_genes <- intersect(rownames(seurat_obj), converted[[species_sym]])
       unmatched_genes <- setdiff(rownames(seurat_obj), matched_genes)
       all_genes <- c(matched_genes, unmatched_genes)
@@ -540,7 +519,6 @@ RunOrthologAL <- function(){
       converted[[species_sym]] <- as.character(converted[[species_sym]])
       converted$HGNC.symbol <- as.character(converted$HGNC.symbol)
       
-      # mapping required to convert species rownames from the object to human
       rownames(tmp.counts) <- make.unique(plyr::mapvalues(
         x = as.character(rownames(tmp.counts)),
         from = as.character(converted[[species_sym]]),
@@ -569,12 +547,32 @@ RunOrthologAL <- function(){
       }
     })
     
+    # --- DYNAMIC DOWNLOAD UI ---
     output$download_visibile_in_main_page <- renderUI({
       if (!is.null(convertedData())) {
-        downloadButton("downloadButton", "Download Converted Data", class = "btn btn-success btn-block mt-3")
+        wellPanel(
+          h5("Choose Download Destination:"),
+          radioButtons("download_destination", label = NULL, 
+                       choices = c("Local Computer" = "local", "Save to Server" = "server"), 
+                       inline = TRUE),
+          
+          # Show standard download button if Local is selected
+          conditionalPanel(
+            condition = "input.download_destination == 'local'",
+            downloadButton("downloadButton", "Download Converted Data", class = "btn btn-success btn-block mt-3")
+          ),
+          
+          # Show shinyFiles save button if Server is selected
+          conditionalPanel(
+            condition = "input.download_destination == 'server'",
+            shinySaveButton("save_server_btn", "Save to Server", "Save file as...", 
+                            filetype = list(RDS = "rds"), class = "btn btn-primary btn-block mt-3")
+          )
+        )
       }
     })
     
+    # --- LOCAL DOWNLOAD ---
     output$downloadButton <- downloadHandler(
       filename = function() {
         if (!is.null(convertedData()))
@@ -585,7 +583,23 @@ RunOrthologAL <- function(){
           saveRDS(convertedData(), file)
       }
     )
+    
+    # --- SERVER SAVE ---
+    observeEvent(input$save_server_btn, {
+      req(!is.integer(input$save_server_btn))
+      file_info <- parseSavePath(volumes, input$save_server_btn)
+      req(nrow(file_info) > 0)
+      
+      save_path <- as.character(file_info$datapath[1])
+      
+      tryCatch({
+        # Save the file to the chosen server path
+        showNotification("Saving to server, please wait...", type = "default", duration = 3)
+        saveRDS(convertedData(), save_path)
+        showNotification(paste("Success! File saved to:", save_path), type = "message", duration = 10)
+      }, error = function(e) {
+        showNotification(paste("Error saving file:", e$message), type = "error", duration = 10)
+      })
+    })
   }
-  shinyApp(ui, server)
 }
-
