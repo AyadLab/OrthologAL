@@ -212,15 +212,16 @@ server <- function(input, output, session) {
     converted_unique <- converted[!duplicated(converted$HGNC.symbol), ]
     ortho_class_Data <- as.data.frame(table(converted_unique$Gene.type))
     colnames(ortho_class_Data) <- c("Gene_Type", "Freq")
-    dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein-coding", "Freq"]
-    biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein-coding", "Freq"] 
+    #dataset_pco <- ortho_class_Data[ortho_class_Data$Gene_Type == "protein-coding", "Freq"]
+    #biomart_ortho_pco_mouse <- species_hg_class[species_hg_class$Gene_Type == "protein-coding", "Freq"] 
+    dataset_pco <- sum(ortho_class_Data[ortho_class_Data$Gene_Type %in% c("protein-coding", "protein_coding"), "Freq"])
+    biomart_ortho_pco_mouse <- sum(species_hg_class[species_hg_class$Gene_Type %in% c("protein-coding", "protein_coding"), "Freq"])
     matched <- dataset_pco/biomart_ortho_pco_mouse * 100
     unmatched <- 100 - matched
     pie_data <- data.frame(
       category = c("Matched", "Unmatched"),
       count = c(matched,unmatched)
     )
-    
     matched_genes <- intersect(rownames(seurat_obj), converted[[species_sym]])
     unmatched_genes <- setdiff(rownames(seurat_obj), matched_genes)
     all_genes <- c(matched_genes, unmatched_genes)
