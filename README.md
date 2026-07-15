@@ -50,6 +50,9 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("biomaRt")
 install.packages("shiny")
+install.packages("shinyFiles")
+install.packages("viridis")
+install.packages("DT")
 install.packages("dplyr")
 install.packages("data.table")
 install.packages('DT')
@@ -67,9 +70,9 @@ cd OrthologAL-main/
 ```
 <OR>
     
-You can also install a version where it can take server files too
-```git
-git clone -b server_files_update https://github.com/AyadLab/scFOCAL.git
+Recommended : You can also install a more robust version where it can take server files too
+```r
+devtools::install_github("AyadLab/OrthologAL", ref = "can_take_server_files")
 ```
 ### Step 2: Install the package 
 ```r
